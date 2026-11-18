@@ -1,0 +1,30 @@
+name: ESP32 firmware build
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  firmware:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arduino/setup-arduino-cli@v2
+        with:
+          version: '1.4.1'
+      - name: Install ESP32 platform and libraries
+        run: |
+          arduino-cli config init
+          arduino-cli config add board_manager.additional_urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
+          arduino-cli core update-index
+          arduino-cli core install esp32:esp32@3.3.7
+          arduino-cli lib install 'PubSubClient@2.8.0' 'Keypad@3.1.1' 'LiquidCrystal I2C@1.1.2'
+      - name: Build with example configuration
+        run: |
+          sketch="$RUNNER_TEMP/tictactoe_esp32"
+          mkdir -p "$sketch"
+          cp tictactoe_esp32.ino "$sketch/"
+          cp wifi_secrets.example.h "$sketch/wifi_secrets.h"
+          arduino-cli compile --fqbn esp32:esp32:esp32 "$sketch"
+          bash -n simulatedplayer.sh
