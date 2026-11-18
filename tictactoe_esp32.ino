@@ -4,8 +4,10 @@
 #include <LiquidCrystal_I2C.h>
 #include <Wire.h>
 
-const char* WIFI_SSID     = "REDACTED_WIFI_SSID";
-const char* WIFI_PASSWORD = "REDACTED_WIFI_PASSWORD";
+#if !__has_include("wifi_secrets.h")
+#error "Copy wifi_secrets.example.h to wifi_secrets.h and configure Wi-Fi."
+#endif
+#include "wifi_secrets.h"
 const char* MQTT_BROKER   = "diazcs2600.duckdns.org";
 const int   MQTT_PORT     = 8883;
 
@@ -128,8 +130,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 void connectWiFi() {
   Serial.println("Starting WiFi connection...");
-  Serial.print("Connecting to SSID: ");
-  Serial.println(WIFI_SSID);
+  Serial.println("Connecting to Wi-Fi");
 
   WiFi.disconnect(true);
   delay(1000);
